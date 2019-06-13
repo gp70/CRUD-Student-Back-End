@@ -1,7 +1,8 @@
 const router = require('express').Router();
 const {Campus} = require('../../database');
 
-router.get('/', async (req,res, next) =>{
+
+router.get('/', async (req, res, next) =>{
   try{
     const allCampuses = await Campus.findAll();
     res.send(allCampuses);
@@ -19,6 +20,34 @@ router.get('/:id', async (req,res,next)=>{
   }
 });
 
+router.delete('/:id',  async (req,res,next)=>{
+  try{
+    Campus.destroy({
+      where: {
+        id: req.params.id
+      }
+    })
+    console.log(`Successfully deleted Campus ${req.params.id}`);
+    res.send("Deleted Campus!");
+  } catch(error){
+    next(error);
+  }
+});
+
+//Updating Campus Information
+router.put('/:id', async (req,res,next)=>{
+  try{
+    Campus.update(
+      req.body,
+      {returning: true, where: {id: req.params.id}}
+    )
+    .then(function([rowsUpdated,[updatedCampus]]){
+      res.json(updatedCampus);
+    });
+  } catch(error){
+    next(error);
+  }
+});
 
 //Generating new data
 router.post('/', async (req, res, next) => {
