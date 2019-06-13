@@ -1,5 +1,7 @@
-const router = require('express').Router();
+
 const {Student} = require('../../database');
+const router = require('express').Router();
+
 
 //Viewing the information
 router.get('/', async (req,res, next) =>{
@@ -11,6 +13,8 @@ router.get('/', async (req,res, next) =>{
   }
 });
 
+
+//Getting a specific student
 router.get('/:id', async (req,res,next)=>{
   try{
     const student = await Student.findByPk(req.params.id)
@@ -20,28 +24,31 @@ router.get('/:id', async (req,res,next)=>{
   }
 });
 
-router.delete('/:id', async (req,res,next)=>{
+//Deleting a student
+router.delete('/:id',  async (req,res,next)=>{
   try{
-    const student = await Student.findByPk(req.params.id)
-    res.send(student);
+    Student.destroy({
+      where: {
+        id: req.params.id
+      }
+    })
+    console.log(`Successfully deleted Student ${req.params.id}`);
+    res.send("Deleted Student!");
   } catch(error){
     next(error);
   }
 });
 
 
-router.update('/:id', async (req,res,next)=>{
+//Updating Student Information
+router.put('/:id', async (req,res,next)=>{
   try{
-    Student.findByPk(req.params.id)
-    .then((student) =>{
-      student.update({
-        firstName: req.body.firstName,
-        astName: req.body.lastName,
-        gpa: req.body.gpa,
-        email: req.body.email,
-        imageURL: req.body.imageURL,
-        campusId: req.body.campusId
-      })
+    Student.update(
+      req.body,
+      {returning: true, where: {id: req.params.id}}
+    )
+    .then(function([rowsUpdated,[updatedStudent]]){
+      res.json(updatedStudent);
     });
   } catch(error){
     next(error);
@@ -51,12 +58,14 @@ router.update('/:id', async (req,res,next)=>{
 //Generating New Student
 router.post('/', async (req, res, next) => {
   try {
+
     const firstName = req.body.firstName;
     const lastName = req.body.lastName;
     const gpa = req.body.gpa;
     const imageURL = req.body.imageURL;
     const email = req.body.email;
     const campusId = req.body.campusId;
+  
     const newStudent = await Student.create({
       firstName,
       lastName,
@@ -65,16 +74,12 @@ router.post('/', async (req, res, next) => {
       imageURL,
       campusId
     });
+
     res.send(newStudent);
   } catch (error) {
     next(error);
   }
 });
-
-
-//Updating Information
-
-
 
 
 module.exports = router;

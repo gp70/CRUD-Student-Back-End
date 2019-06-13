@@ -1,8 +1,13 @@
 const express = require('express');
 const app = express();
 const {db} = require('./database');
+const bodyParser = require('body-parser');
 
+//var jsonParser = bodyParser.json();
+
+app.use(bodyParser.json());
 app.use('/api', require('./api'));
+
 
 db.sync()
   .then(() =>{
